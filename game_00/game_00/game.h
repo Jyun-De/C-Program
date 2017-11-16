@@ -1,22 +1,38 @@
 #include<math.h>;
 
 
-int x;
-int y;
+class Unit
+{
+public:
+	float  x;
+	float y;
+};
 
-int x2;
-int y2;
+Unit player;
+
+const int MONSTER_COUNT = 10;
+Unit monster[MONSTER_COUNT];
 
 
+//x2[0],y[0]第1隻怪物座標
+//x2[1],y[1]第2隻怪物座標
+//x2[2],y[2]第3隻怪物座標
 
 //gameInit設定遊戲初始資料
 void gameInit()
 {
-	x = 200;
-	y = 200;
+	
+	player.x = 100;
+	player.y = 100;
 
-	x2 = 400;
-	y2 = 400;
+	
+	for (int i = 0; i < MONSTER_COUNT; i++)
+	{
+		monster[i].x = i * 100;
+		monster[i].y = i * 200;
+	}
+
+
 }
 
 
@@ -29,35 +45,42 @@ void gameWork()
 	const int PLAYER_SPEED=20;
 	int keyState = GetAsyncKeyState(VK_RIGHT);
 	if (keyState < 0)
-		x += PLAYER_SPEED;
+		player.x += PLAYER_SPEED;
 	keyState = GetAsyncKeyState(VK_LEFT);
 	if (keyState < 0)
-		x -= PLAYER_SPEED;
+		player.x -= PLAYER_SPEED;
 	keyState = GetAsyncKeyState(VK_UP);
 	if (keyState < 0)
-		y -= PLAYER_SPEED;
+		player.y -= PLAYER_SPEED;
 	keyState = GetAsyncKeyState(VK_DOWN);
 	if (keyState < 0)
-		y += PLAYER_SPEED;
-
-	//走一步的距離為m,L兩點距離
-	//向量  (x-x2)*m/L	,(y-y2)m/L
-	int L =sqrt(float(x - x2)*(x - x2) + (y - y2)*(y - y2));
-	int m = 10;
-
-	x2 = x2+(x - x2)*m / L;
-	y2 = y2+(y - y2)*m / L;
+		player.y += PLAYER_SPEED;
 
 
 
-	//if (x2>x)//怪物在主角移動
-	//	x2--;
-	//else
-	//	x2++;	
-	//if (y2>y)
-	//	y2--;
-	//else
-	//	y2++;
+	for (int i = 0; i < MONSTER_COUNT; i++)
+	{
+		//走一步的距離為m,L兩點距離
+		//向量  (x-x2)*m/L	,(y-y2)m/L
+		float L = sqrt(float(player.x - monster[i].x)*(player.x - monster[i].x) 
+									+ (player.y - monster[i].y)*(player.y - monster[i].y));
+		float m = 5;
+
+		if (m>L)//步伐>距離
+		{
+			//站到對方身上
+			monster[i].x = player.x;
+			monster[i].y = player.y;
+		}
+		else
+		{
+			monster[i].x = monster[i].x + (player.x - monster[i].x)*m / L;
+			monster[i].y = monster[i].y + (player.y - monster[i].y)*m / L;
+		}
+		
+	}
+
+
 }
 
 
@@ -66,6 +89,10 @@ void gameWork()
 //gameDraw畫出遊戲的畫面
 void gameDraw(HDC hdc)
 {
-	Ellipse(hdc, x - 50, y - 50, x + 50, y + 50);
-	Ellipse(hdc, x2 - 50, y2 - 50, x2 + 50, y2 + 50);
+	Ellipse(hdc, player.x - 50, player.y - 50, player.x + 50, player.y + 50);
+	for (int i = 0; i < MONSTER_COUNT; i++)
+	{
+		Ellipse(hdc, monster[i].x - 50, monster[i].y - 50, monster[i].x + 50, monster[i].y + 50);
+	}
+	
 }
